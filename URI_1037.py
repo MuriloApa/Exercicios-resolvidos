@@ -8,4 +8,4 @@ if x>50 and x<=75:
 if x>75 and x<=100:
     print("Intervalo (75,100]")
 if x<0 or x>100:
-    print("Fora do intervalo")
+    print("Fora de intervalo")
