@@ -1,4 +1,5 @@
-/*Aqui está minha solução para o problema proposto como primeira avaliação da disciplina de Algoritmos e Programação II ministrada na UFMS câmpus de Três Lagoas*/
+/*Aqui está minha solução para o problema proposto como primeira avaliação da disciplina de Algoritmos e Programação II no curso de Sistemas de Informação
+ministrada na UFMS câmpus de Três Lagoas*/
 
 #include <stdio.h>
 #include <string.h>
