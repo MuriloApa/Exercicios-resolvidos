@@ -1,5 +1,6 @@
 /*Aqui está minha solução para o problema proposto como primeira avaliação da disciplina de Algoritmos e Programação II no curso de Sistemas de Informação
-ministrada na UFMS câmpus de Três Lagoas*/
+ministrada na UFMS câmpus de Três Lagoas.
+  O enunciado, bem como exemplos de entrada e saída, estão num arquivo em formato pdf neste mesmo repositório com o mesmo nome deste código escrito em c*/
 
 #include <stdio.h>
 #include <string.h>
