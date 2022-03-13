@@ -150,6 +150,7 @@ nos obstáculos encontrados*/
 char movimento1 (struct saidas_posicoes *robo, struct saidas_posicoes *saida, struct saidas_posicoes *anterior, int *tempo, char **a, int i)
 {
     char text[2];
+    /*A função sprintf converte um inteiro numa string, esta string será utilizada para verificar se dada posição corresponde a saída desejada*/
     sprintf(text, "%d", i);
     /*As decisões sobre para qual direção seguir começam pelas escolhas mais óbvias, andar para o lado que mais faz sentido*/
     /*Por exemplo: Se o robo está mais acima da saída, então ele deve andar para baixo*/
@@ -401,16 +402,17 @@ char movimento1 (struct saidas_posicoes *robo, struct saidas_posicoes *saida, st
             return 'b';
         }
     }
-    /*o tempo sempre iá diminuir de um em um, independentemente do movimento realizado*/
     *tempo=*tempo-1;
     /*A função sempre tem que retornar algo, então, se houver uma situação em que nenhum dos movimentos acima possa ser realizado
-    a função irpa retornar o caracter h*/
+    a função irá retornar o caracter h*/
     return 'h';
 }
 
 
 /*Segunda versão da função que determina o movimento do robô*/
 /*Esta, por sua vez, começa verificando pela horizontal (direita e esquerda)*/
+/*Os passos são os mesmos da função anterior, estão apenas em ordem diferente, logo, entendo que seria redundante colocar todas as
+explicações novamente*/
 char movimento2 (struct saidas_posicoes *robo, struct saidas_posicoes *saida, struct saidas_posicoes *anterior, int *tempo, char **a, int i)
 {
     char text[2];
@@ -677,9 +679,10 @@ int main(int argc, char *argv[])
 {
     FILE *ptentrada, *ptsaida;
     int tempo1, tempo2, n_saidas, linhas, colunas, i, alcancadas=0, proxima;
-    char **arena, nome_instancia[52], arquivo_saida[60], **percurso, *pilhatemp;
+    char **arena, nome_instancia[52], arquivo_saida[60], **percurso, *percursotemp;
     struct saidas_posicoes *saidas_posicoes, robo, robo2, posicao_anterior_robo1, posicao_anterior_robo2;
     int t1=-1, *P1; /*Pilha 1 para salvar as posições das saídas mais próximas*/
+
     /*Abertura para leitura do arquivo que contém a arena*/
     ptentrada=fopen(argv[1], "r");
     if(ptentrada==NULL)
@@ -691,6 +694,7 @@ int main(int argc, char *argv[])
     /*Leitura dos dados contidos no arquivo de entrada*/
     fscanf(ptentrada,"Instância %s\nOrçamento: %d\nSaídas: %d\nDimensões: %dx%d",nome_instancia, &tempo1, &n_saidas, &linhas, &colunas);
 
+    /*Criando uma string com o nome da instância e a concatenando com ".out"*/
     strcpy(arquivo_saida, nome_instancia);
     strcat(arquivo_saida, ".out");
 
@@ -699,7 +703,7 @@ int main(int argc, char *argv[])
 
     /*Alocação do vetor de caracteres para os caminhos*/
     percurso=aloca_arena(n_saidas, tempo1+1);
-    pilhatemp=linhas_arena(tempo1+1);
+    percursotemp=linhas_arena(tempo1+1);
 
     /*Alocação da pilha para as saídas mais próximas*/
     P1=aloca_vetor(n_saidas);
@@ -710,7 +714,7 @@ int main(int argc, char *argv[])
     /*Leitura da arena*/
     leitura_arena(linhas, arena, ptentrada);
 
-    /*Alocação do vetor de registros que contera as coordenadas das saídas*/
+    /*Alocação do vetor de registros que conterá as coordenadas das saídas*/
     saidas_posicoes=aloca_vetor_registro(n_saidas);
 
     /*Salva as posições das saídas e inicial do robô no vetor de registros alocado anteriormente*/
@@ -730,13 +734,13 @@ int main(int argc, char *argv[])
             tempo2=tempo1;
             robo2=robo;
             posicao_anterior_robo2=posicao_anterior_robo1;
-            /*A função movimento irá ser chamada até o tempo se esgotar ou até a posição do robô não coincidir com a saída*/
+            /*A função movimento irá ser chamada até o tempo se esgotar ou até a posição do robô coincidir com a saída*/
             while (tempo2!=0 && (robo2.x!=saidas_posicoes[i].x || robo2.y!=saidas_posicoes[i].y))
             {
                 percurso[i][tempo1-tempo2]=movimento1(&robo2, saidas_posicoes, &posicao_anterior_robo2, &tempo2, arena, i);
                 percurso[i][tempo1-tempo2+1]='\0';
             }
-            /*Caso o tempo se esgote e as posição do robô e da saída divirjam, entende-se que a saída não foi alcançada */
+            /*Caso o tempo se esgote e as posição do robô e da saída sejam diferentes, entende-se que a saída não foi alcançada */
             if (tempo2==0 && (robo2.x!=saidas_posicoes[i].x || robo2.y!=saidas_posicoes[i].y))
             {
                 strcpy(percurso[i], "Não alcançada!");
@@ -747,25 +751,25 @@ int main(int argc, char *argv[])
             /*Mesmo processo aqui, mas agora com a segunda versão da função movimento*/
             while (tempo2!=0 && (robo2.x!=saidas_posicoes[i].x || robo2.y!=saidas_posicoes[i].y))
             {
-                pilhatemp[tempo1-tempo2]=movimento2(&robo2, saidas_posicoes, &posicao_anterior_robo2, &tempo2, arena, i);
-                pilhatemp[tempo1-tempo2+1]='\0';
+                percursotemp[tempo1-tempo2]=movimento2(&robo2, saidas_posicoes, &posicao_anterior_robo2, &tempo2, arena, i);
+                percursotemp[tempo1-tempo2+1]='\0';
             }
             if (tempo2==0 && (robo2.x!=saidas_posicoes[i].x || robo2.y!=saidas_posicoes[i].y))
             {
-                strcpy(pilhatemp, "Não alcançada!");
+                strcpy(percursotemp, "Não alcançada!");
             }
             /*Esses dois desvios condicionais irão determinar qual caminho é mais vantajoso*/
             /*O caminho escolhido sempre será salvo no vetor percurso*/
-            /**/
-            if (strcmp(percurso[i],"Não alcançada!")==0 && strcmp(pilhatemp,"Não alcançada!")!=0)
+            /*o caminho contido em "percursotemp" será copiado na variável "percurso" se nesta não tiver sido encontrado caminho e na outra sim*/
+            if (strcmp(percurso[i],"Não alcançada!")==0 && strcmp(percursotemp,"Não alcançada!")!=0)
             {
-                strcpy(percurso[i], pilhatemp);
+                strcpy(percurso[i], percursotemp);
             }
-            if (strcmp(percurso[i],"Não alcançada!")!=0 && strcmp(pilhatemp,"Não alcançada!")!=0 && strlen(pilhatemp)<strlen(percurso[i]))
+            /*Se houver um trajeto nas duas variáveis e o da variável "percursotemp" for menor, este caminho será copiado na variável "percurso"*/
+            if (strcmp(percurso[i],"Não alcançada!")!=0 && strcmp(percursotemp,"Não alcançada!")!=0 && strlen(percursotemp)<strlen(percurso[i]))
             {
-                strcpy(percurso[i], pilhatemp);
+                strcpy(percurso[i], percursotemp);
             }
-            
         }
         /*Calculo de quantas saídas foram alcançadas*/
         for(i=0; i<n_saidas; i++)
@@ -803,13 +807,10 @@ int main(int argc, char *argv[])
                 if (strcmp(percurso[i], "Não alcançada!")!=0)
                 {
                     fprintf(ptsaida,"Saída %d: %ld segundos -> %s\n", i, strlen(percurso[i]), percurso[i]);
-
                     /*Se "proxima" é maior que o caminho para a saída "i", então o caminho para esta é menor e deve-se atualizar "proxima" e "P1"*/
-
                     if (proxima>strlen(percurso[i]))
                     {
                         proxima=strlen(percurso[i]);
-
                         /*Deve-se desempilhar toda a pilha, pois se encontrou um caminho menor que todos os outros salvos até agora*/
                         while (t1>-1)
                         {
@@ -817,8 +818,7 @@ int main(int argc, char *argv[])
                         }
                         empilha_seq(&t1, P1, i, n_saidas);
                     }
-
-                    /*Se "proxima é igual ao caminho para a saída "i" e o último elemento da pilha é diferente de "i", então se encontrou
+                    /*Se "proxima" é igual ao caminho para a saída "i" e o último elemento da pilha é diferente de "i", então se encontrou
                     mais um caminho de tamanho igual ao menor anterior e salva-se ele na pilha*/
                     if (proxima==strlen(percurso[i]) && P1[t1]!=i)
                     {
@@ -838,9 +838,8 @@ int main(int argc, char *argv[])
             printf("Arquivo %s gerado com sucesso!\n", arquivo_saida);
         }
     }
-
+    
     /*Devolvendo os blocos de memória alocados dinamicamente*/
-
     free(saidas_posicoes);
     for (i=0; i<linhas; i++)
     {
@@ -850,11 +849,10 @@ int main(int argc, char *argv[])
     {
         free(percurso[i]);
     }
-    free(pilhatemp);
+    free(percursotemp);
     free(P1);
-
+    
     /*fechando os arquivos*/
-
     fclose(ptentrada);
     fclose(ptsaida);
     return 0;
